@@ -1,0 +1,42 @@
+#cloud-config
+
+# https://github.com/kairos-io/kairos/issues/885
+config_url: ""
+
+install:
+  auto: true
+  device: "auto"
+  reboot: true
+
+hostname: kairoslab-{{ trunc 4 .MachineID }}
+users:
+- name: kairos
+  passwd: kairos
+  ssh_authorized_keys:
+  - github:lordmuffin
+
+kubevip:
+  eip: "192.168.1.20"
+
+k3s:
+  enabled: true
+  args:
+  - --disable=traefik,servicelb
+
+p2p:
+  disable_dht: true #Enabled by default
+  network_token: "<INSERT YOUR TOKEN>"
+  auto:
+    enable: true
+    ha:
+      enable: true
+      master_nodes: 2
+
+stages:
+   boot:
+     - name: "Setup exception trace"
+       systctl:
+          debug.exception-trace: "0"
+          fs.inotify.max_user_watches: "512"
+          fs.inotify.max_user_instances: "512"
+          fs.inotify.max_queued_events: "512"
